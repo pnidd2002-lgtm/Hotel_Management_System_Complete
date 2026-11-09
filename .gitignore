@@ -1,0 +1,39 @@
+# ==========================================
+# MASTER .GITIGNORE FOR HOTEL MANAGEMENT SYSTEM
+# ==========================================
+
+# 1. Frontend / Node
+**/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# 2. .NET / C# Build Artifacts
+**/bin/
+**/obj/
+**/.vs/
+*.user
+*.suo
+*.userprefs
+*.pidb
+*.booproj
+*.svclog
+
+# 3. Archives & Large Files
+*.rar
+*.zip
+*.7z
+*.tar.gz
+
+# 4. Python cache
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# 5. OS Generated
+.DS_Store
+Thumbs.db
+desktop.ini
