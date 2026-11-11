@@ -157,7 +157,10 @@ export default function App() {
     try {
       const res = await fetch('http://localhost:5000/api/rooms', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': user?.token ? `Bearer ${user.token}` : ''
+        },
         body: JSON.stringify({
           roomNumber: newRoomNumber,
           roomType: newRoomType,
