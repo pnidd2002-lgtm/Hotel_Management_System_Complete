@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HotelManagementApi.Data;
@@ -105,6 +106,7 @@ namespace HotelManagementApi.Controllers
 
         // POST: api/rooms
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddRoom([FromBody] Room room)
         {
             if (!ModelState.IsValid)
@@ -122,6 +124,7 @@ namespace HotelManagementApi.Controllers
 
         // PUT: api/rooms/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateRoom(int id, [FromBody] Room room)
         {
             if (id != room.RoomId)
@@ -146,6 +149,7 @@ namespace HotelManagementApi.Controllers
 
         // DELETE: api/rooms/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteRoom(int id)
         {
             var room = await _context.Rooms.FindAsync(id);

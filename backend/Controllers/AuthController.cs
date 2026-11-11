@@ -1,5 +1,12 @@
+using System;
+using System.Text;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
 using HotelManagementApi.Data;
 using HotelManagementApi.Models;
 using BCrypt.Net;
@@ -11,10 +18,12 @@ namespace HotelManagementApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly HotelDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(HotelDbContext context)
+        public AuthController(HotelDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // POST: api/auth/login
@@ -28,7 +37,7 @@ namespace HotelManagementApi.Controllers
 
             // Match by Email, Username, or FullName (supports username "Pasindu")
             var user = await _context.Customers
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == identifier || 
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == identifier ||
                                           u.FullName.ToLower() == identifier ||
                                           (identifier == "pasindu" && u.Role == "Admin"));
 
@@ -57,6 +66,9 @@ namespace HotelManagementApi.Controllers
                 return Unauthorized(new { message = "Invalid username/email or password." });
             }
 
+            // Bake the JWT Token!
+            var token = GenerateJwtToken(user);
+
             return Ok(new AuthResponse
             {
                 CustomerId = user.CustomerId,
@@ -64,7 +76,8 @@ namespace HotelManagementApi.Controllers
                 Email = user.Email,
                 Phone = user.Phone,
                 Address = user.Address,
-                Role = user.Role
+                Role = user.Role,
+                Token = token
             });
         }
 
@@ -88,7 +101,7 @@ namespace HotelManagementApi.Controllers
             {
                 FullName = request.FullName.Trim(),
                 Email = request.Email.Trim().ToLower(),
-                Password = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12), 
+                Password = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12),
                 Phone = request.Phone.Trim(),
                 Address = request.Address?.Trim(),
                 Role = "Customer", // Hardcoded security enforcement - cannot choose Admin
@@ -98,6 +111,9 @@ namespace HotelManagementApi.Controllers
             _context.Customers.Add(newUser);
             await _context.SaveChangesAsync();
 
+            // Bake the JWT Token for the newly registered user!
+            var token = GenerateJwtToken(newUser);
+
             return Ok(new AuthResponse
             {
                 CustomerId = newUser.CustomerId,
@@ -105,7 +121,8 @@ namespace HotelManagementApi.Controllers
                 Email = newUser.Email,
                 Phone = newUser.Phone,
                 Address = newUser.Address,
-                Role = newUser.Role
+                Role = newUser.Role,
+                Token = token
             });
         }
 
@@ -157,6 +174,37 @@ namespace HotelManagementApi.Controllers
                 Address = customer.Address,
                 Role = customer.Role
             });
+        }
+
+
+        //JWT token genaration//
+        private string GenerateJwtToken(Customer user)
+        {
+            var jwtKey = _configuration["Jwt:Key"];
+            var jwtIssuer = _configuration["Jwt:Issuer"];
+            var jwtAudience = _configuration["Jwt:Audience"];
+            var durationMinutes = Convert.ToDouble(_configuration["Jwt:DurationInMinutes"] ?? "120");
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.CustomerId.ToString()),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role), // "Admin" or "Customer"
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: jwtIssuer,
+                audience: jwtAudience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(durationMinutes),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

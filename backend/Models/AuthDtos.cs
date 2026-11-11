@@ -40,5 +40,8 @@ namespace HotelManagementApi.Models
         public string Phone { get; set; } = string.Empty;
         public string? Address { get; set; }
         public string Role { get; set; } = string.Empty;
+
+        //Jwt//
+        public string Token {  get; set; } = string.Empty;
     }
 }

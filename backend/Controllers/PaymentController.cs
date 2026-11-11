@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HotelManagementApi.Data;
@@ -117,6 +118,7 @@ namespace HotelManagementApi.Controllers
         // GET: api/payments//
         // List all payments for Admin financial auditing//
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllPayments()
         {
             var payments = await _context.Payments
