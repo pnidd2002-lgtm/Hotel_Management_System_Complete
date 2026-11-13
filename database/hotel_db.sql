@@ -11,7 +11,8 @@ CREATE DATABASE IF NOT EXISTS `hotel_db`
 
 USE `hotel_db`;
 
--- Drop existing tables to allow clean re-import
+-- Drop existing tables to allow clean re-import (Order matters due to foreign keys!)
+DROP TABLE IF EXISTS `Payments`;
 DROP TABLE IF EXISTS `Bookings`;
 DROP TABLE IF EXISTS `Rooms`;
 DROP TABLE IF EXISTS `Customers`;
@@ -59,20 +60,34 @@ CREATE TABLE `Bookings` (
         REFERENCES `Rooms` (`RoomId`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 4. Payments Table (Transaction Ledger & Audit Trail)
+CREATE TABLE IF NOT EXISTS `Payments` (
+    `PaymentId` INT AUTO_INCREMENT PRIMARY KEY,
+    `BookingId` INT NOT NULL,
+    `Amount` DECIMAL(18, 2) NOT NULL,
+    `PaymentMethod` VARCHAR(50) NOT NULL,
+    `TransactionId` VARCHAR(100) NOT NULL,
+    `PaymentStatus` VARCHAR(50) NOT NULL,
+    `PaymentDate` DATETIME(6) NOT NULL,
+    CONSTRAINT `FK_Payments_Bookings_BookingId` FOREIGN KEY (`BookingId`) 
+        REFERENCES `Bookings` (`BookingId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Indexes for performance and booking lookups
 CREATE INDEX `IX_Bookings_Room_Dates` ON `Bookings` (`RoomId`, `CheckInDate`, `CheckOutDate`, `BookingStatus`);
 CREATE INDEX `IX_Bookings_Customer` ON `Bookings` (`CustomerId`);
+CREATE INDEX `IX_Payments_BookingId` ON `Payments` (`BookingId`);
 
 -- =====================================================================
 -- Seed Data
 -- =====================================================================
 
--- Users (Admin, Receptionist, Customer)
+-- Users (BCrypt Hashed with workFactor 12: Pasindu@123, customer123, sarah2026, reception123)
 INSERT INTO `Customers` (`CustomerId`, `FullName`, `Email`, `Password`, `Phone`, `Address`, `Role`) VALUES
-(1, 'Pasindu Nirmal Iddamalgoda', 'Pasindu', 'Pasindu@123', '+94778122419', 'Negombo, Sri Lanka', 'Admin'),
-(2, 'John Doe', 'john.doe@example.com', 'customer123', '+1 555-0199', '42 Elm Street, Westwood, CA', 'Customer'),
-(3, 'Sarah Connor', 'sarah.c@example.com', 'sarah2026', '+1 555-0245', '742 Evergreen Terrace, Springfield', 'Customer'),
-(4, 'Elena Rostova', 'reception@hotel.com', 'reception123', '+1 555-0155', 'Front Desk, Luxury Bay Hotel', 'Receptionist');
+(1, 'Pasindu Nirmal Iddamalgoda', 'Pasindu', '$2a$12$2XO9BU16/z2QyS7vYKsvquv5NNbQBdB/q7DoQ2GPb7fk3RlGDgKca', '+94778122419', 'Negombo, Sri Lanka', 'Admin'),
+(2, 'Anuradha', 'anuradha@gmail.com', '$2a$12$DDsgKGf05NvXjjZeir0Y8uB76SLyDJMbcSS/RucZznmV/iMYVMJMm', '+1 555-0199', '42 Elm Street, Westwood, CA', 'Customer'),
+(3, 'Sarah Connor', 'sarah.c@example.com', '$2a$12$10GxWzAix/lIDZGdUb/DJeBwqTOkDZbv7MC/mB7OFnQqtxXC7trme', '+1 555-0245', '742 Evergreen Terrace, Springfield', 'Customer'),
+(4, 'Elena Rostova', 'reception@hotel.com', '$2a$12$BM2i6TvMs.MVyWoswD7yTeCf1LjBfgxY8IUhuLrAWHf1CZvbAV9ri', '+1 555-0155', 'Front Desk, Luxury Bay Hotel', 'Receptionist');
 
 -- Hotel Rooms (Prices in Sri Lankan Rupees - LKR)
 INSERT INTO `Rooms` (`RoomId`, `RoomNumber`, `RoomType`, `PricePerNight`, `Capacity`, `Status`, `Description`, `Amenities`, `ImageName`) VALUES
@@ -111,3 +126,8 @@ INSERT INTO `Bookings` (`BookingId`, `CustomerId`, `RoomId`, `CheckInDate`, `Che
 (1, 2, 2, '2026-10-10', '2026-10-15', 2, 210000.00, 'Confirmed', 'Late check-in requested around 8:00 PM.'),
 (2, 3, 3, '2026-10-12', '2026-10-16', 2, 260000.00, 'Confirmed', 'Extra feather pillows and complimentary wine on arrival.'),
 (3, 2, 1, '2026-09-27', '2026-10-02', 2, 140000.00, 'Confirmed', 'Airport shuttle required at 2 PM. Quiet room requested.');
+
+-- Initial Payments (Matching Bookings 1 and 2)
+INSERT INTO `Payments` (`PaymentId`, `BookingId`, `Amount`, `PaymentMethod`, `TransactionId`, `PaymentStatus`, `PaymentDate`) VALUES
+(1, 1, 210000.00, 'Credit Card (Visa)', 'TXN-20261010-8491A2', 'Completed', '2026-10-10 14:30:00'),
+(2, 2, 260000.00, 'Credit Card (Mastercard)', 'TXN-20261012-9214F6', 'Completed', '2026-10-12 09:15:00');
