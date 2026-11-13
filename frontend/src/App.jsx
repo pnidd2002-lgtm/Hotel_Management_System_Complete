@@ -37,6 +37,11 @@ export default function App() {
   // Notifications
   const [message, setMessage] = useState('');
 
+  // Admin Dashboard & Reports State
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [adminPayments, setAdminPayments] = useState([]);
+  const [loadingDashboard, setLoadingDashboard] = useState(false);
+
   // Admin Room Form State
   const [newRoomNumber, setNewRoomNumber] = useState('');
   const [newRoomType, setNewRoomType] = useState('Ocean View Suite');
@@ -118,6 +123,35 @@ export default function App() {
     }
   };
 
+  // Load Admin Dashboard Metrics & Card Transactions
+  const loadAdminDashboard = async () => {
+    if (!user || user.role !== 'Admin') return;
+    setLoadingDashboard(true);
+    try {
+      // 1. Fetch KPI metrics (Total Revenue, Total Bookings, Registered Customers)
+      const statsRes = await fetch('http://localhost:5000/api/dashboard/stats');
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setDashboardStats(statsData);
+      }
+
+      // 2. Fetch Card Payment Transactions (Requires Admin Bearer Token)
+      const paymentsRes = await fetch('http://localhost:5000/api/payments', {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      if (paymentsRes.ok) {
+        const paymentsData = await paymentsRes.json();
+        setAdminPayments(Array.isArray(paymentsData) ? paymentsData : []);
+      }
+    } catch (err) {
+      console.error('Failed to load admin dashboard:', err);
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     loadRooms();
@@ -130,8 +164,10 @@ export default function App() {
       loadAllActiveBookings();
     } else if (activeTab === 'my-bookings') {
       loadMyBookings();
+    } else if (activeTab === 'admin-dashboard') {
+      loadAdminDashboard();
     }
-  }, [activeTab, occupiedDate]);
+  }, [activeTab, occupiedDate, user]);
 
   // Cancel Booking
   const handleCancelBooking = async (bookingId) => {
@@ -178,6 +214,7 @@ export default function App() {
         setNewRoomNumber('');
         setNewRoomDesc('');
         loadRooms();
+        loadAdminDashboard();
       } else {
         const err = await res.json();
         alert(err.message || 'Error creating room');
@@ -267,12 +304,20 @@ export default function App() {
                 </button>
 
                 {user.role === 'Admin' && (
-                  <button 
-                    className={`btn btn-sm btn-luxury-pill py-1 px-3 ${activeTab === 'admin-rooms' ? 'bg-light border-dark' : ''}`}
-                    onClick={() => setActiveTab('admin-rooms')}
-                  >
-                    Inventory
-                  </button>
+                  <>
+                    <button 
+                      className={`btn btn-sm btn-luxury-pill py-1 px-3 ${activeTab === 'admin-dashboard' ? 'bg-light border-dark' : ''}`}
+                      onClick={() => setActiveTab('admin-dashboard')}
+                    >
+                      <i className="bi bi-graph-up me-1"></i> Reports
+                    </button>
+                    <button 
+                      className={`btn btn-sm btn-luxury-pill py-1 px-3 ${activeTab === 'admin-rooms' ? 'bg-light border-dark' : ''}`}
+                      onClick={() => setActiveTab('admin-rooms')}
+                    >
+                      <i className="bi bi-door-open me-1"></i> Inventory
+                    </button>
+                  </>
                 )}
 
                 <div className="d-none d-md-block text-end ps-2 border-start">
@@ -1229,6 +1274,164 @@ export default function App() {
           </section>
         )}
 
+        {/* 6. ADMIN DASHBOARD & MANAGEMENT REPORTS */}
+        {activeTab === 'admin-dashboard' && user?.role === 'Admin' && (
+          <section className="py-5" style={{ backgroundColor: '#fcfbf8' }}>
+            <div className="container">
+              {/* Header */}
+              <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                <div>
+                  <span className="boutique-tagline d-block mb-1">EXECUTIVE OVERVIEW</span>
+                  <h3 className="brand-serif fw-bold text-dark fs-2 mb-0">Management Reports & Financials</h3>
+                </div>
+                <button 
+                  className="btn btn-sm btn-outline-dark rounded-pill px-3 py-1"
+                  onClick={loadAdminDashboard}
+                  disabled={loadingDashboard}
+                >
+                  <i className={`bi ${loadingDashboard ? 'bi-arrow-repeat' : 'bi-arrow-clockwise'} me-1`}></i>
+                  {loadingDashboard ? 'Updating...' : 'Refresh Data'}
+                </button>
+              </div>
+
+              {/* 3 Simple Metric Cards */}
+              <div className="row g-4 mb-4">
+                {/* 1. Total Revenue */}
+                <div className="col-md-4">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <span className="small text-muted text-uppercase fw-semibold" style={{ letterSpacing: '1px' }}>Total Revenue</span>
+                      <div className="p-2 rounded-circle bg-light text-warning">
+                        <i className="bi bi-cash-stack fs-5"></i>
+                      </div>
+                    </div>
+                    <h3 className="brand-gold fw-bold mb-1 fs-2">
+                      LKR {Number(dashboardStats?.totalRevenue || 0).toLocaleString()}
+                    </h3>
+                    <p className="text-secondary small mb-0">Total revenue generated from confirmed reservations</p>
+                  </div>
+                </div>
+
+                {/* 2. Total Reservations */}
+                <div className="col-md-4">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <span className="small text-muted text-uppercase fw-semibold" style={{ letterSpacing: '1px' }}>Total Reservations</span>
+                      <div className="p-2 rounded-circle bg-light text-primary">
+                        <i className="bi bi-calendar2-check fs-5"></i>
+                      </div>
+                    </div>
+                    <h3 className="brand-serif fw-bold text-dark mb-1 fs-2">
+                      {dashboardStats?.totalBookings ?? 0}
+                    </h3>
+                    <p className="text-secondary small mb-0">Cumulative guest bookings processed by the system</p>
+                  </div>
+                </div>
+
+                {/* 3. Registered Guests */}
+                <div className="col-md-4">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <span className="small text-muted text-uppercase fw-semibold" style={{ letterSpacing: '1px' }}>Registered Guests</span>
+                      <div className="p-2 rounded-circle bg-light text-success">
+                        <i className="bi bi-people fs-5"></i>
+                      </div>
+                    </div>
+                    <h3 className="brand-serif fw-bold text-dark mb-1 fs-2">
+                      {dashboardStats?.totalCustomers ?? 0}
+                    </h3>
+                    <p className="text-secondary small mb-0">Active customer accounts with BCrypt-salted credentials</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Payment Transactions Audit Table */}
+              <div className="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 className="brand-serif fw-bold text-dark mb-1">Card Payment Transactions</h5>
+                    <p className="text-muted small mb-0">Verified electronic transactions and PCI-DSS masked audit logs</p>
+                  </div>
+                  <span className="badge rounded-pill bg-light text-dark border px-3 py-2 small">
+                    {adminPayments.length} Payment{adminPayments.length === 1 ? '' : 's'}
+                  </span>
+                </div>
+
+                {loadingDashboard ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-warning" role="status"></div>
+                    <p className="small text-muted mt-2">Loading transactions...</p>
+                  </div>
+                ) : adminPayments.length === 0 ? (
+                  <div className="text-center py-5 border rounded-3 bg-light">
+                    <i className="bi bi-credit-card-2-front text-muted fs-1 mb-2 d-block"></i>
+                    <p className="text-muted mb-0">No card transactions recorded yet.</p>
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="table table-hover align-middle mb-0">
+                      <thead className="table-light small">
+                        <tr>
+                          <th>Transaction ID</th>
+                          <th>Guest Name</th>
+                          <th>Card Used</th>
+                          <th>Amount (LKR)</th>
+                          <th>Date & Time</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {adminPayments.map((p) => {
+                          const txId = p.transactionId || p.TransactionId || `TXN-${p.paymentId || p.PaymentId}`;
+                          const guestName = p.booking?.customer?.fullName || p.Booking?.Customer?.FullName || 'Guest';
+                          const guestEmail = p.booking?.customer?.email || p.Booking?.Customer?.Email || '';
+                          const card = p.maskedCardNumber || p.MaskedCardNumber || '**** 4242';
+                          const amount = p.amount ?? p.Amount ?? 0;
+                          const date = p.paymentDate || p.PaymentDate;
+                          const status = p.paymentStatus || p.PaymentStatus || 'Completed';
+
+                          return (
+                            <tr key={p.paymentId || p.PaymentId || txId}>
+                              <td>
+                                <code className="text-dark fw-bold bg-light px-2 py-1 rounded border">
+                                  {txId}
+                                </code>
+                              </td>
+                              <td>
+                                <div className="fw-semibold text-dark">{guestName}</div>
+                                {guestEmail && (
+                                  <div className="text-muted small" style={{ fontSize: '0.75rem' }}>{guestEmail}</div>
+                                )}
+                              </td>
+                              <td>
+                                <span className="badge bg-light text-dark border rounded-pill px-2 py-1">
+                                  <i className="bi bi-credit-card me-1"></i>{card}
+                                </span>
+                              </td>
+                              <td className="brand-gold fw-bold">
+                                LKR {Number(amount).toLocaleString()}
+                              </td>
+                              <td className="small text-secondary">
+                                {date ? new Date(date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A'}
+                              </td>
+                              <td>
+                                <span className="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-1">
+                                  <i className="bi bi-check-circle-fill me-1"></i>{status}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </section>
+        )}
+
       </main>
 
       {/* FOOTER */}
@@ -1296,6 +1499,9 @@ export default function App() {
           loadRooms();
           loadOccupiedRooms(checkInFilter, checkOutFilter);
           loadAllActiveBookings();
+          if (user?.role === 'Admin') {
+            loadAdminDashboard();
+          }
         }}
       />
 
