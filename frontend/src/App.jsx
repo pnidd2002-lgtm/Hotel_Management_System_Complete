@@ -42,6 +42,13 @@ export default function App() {
   const [adminPayments, setAdminPayments] = useState([]);
   const [loadingDashboard, setLoadingDashboard] = useState(false);
 
+  // Gallery & Contact Form State
+  const [galleryFilter, setGalleryFilter] = useState('all'); // 'all', 'suites', 'views'
+  const [inquiryName, setInquiryName] = useState('');
+  const [inquiryEmail, setInquiryEmail] = useState('');
+  const [inquirySubject, setInquirySubject] = useState('Reservation Inquiry');
+  const [inquiryMessage, setInquiryMessage] = useState('');
+
   // Admin Room Form State
   const [newRoomNumber, setNewRoomNumber] = useState('');
   const [newRoomType, setNewRoomType] = useState('Ocean View Suite');
@@ -224,6 +231,16 @@ export default function App() {
     }
   };
 
+  // Contact Inquiry Submission Handler
+  const handleInquirySubmit = (e) => {
+    e.preventDefault();
+    setMessage(`Thank you, ${inquiryName}! Your inquiry regarding "${inquirySubject}" has been sent to our concierge.`);
+    setTimeout(() => setMessage(''), 5000);
+    setInquiryName('');
+    setInquiryEmail('');
+    setInquiryMessage('');
+  };
+
   return (
     <div className="min-vh-100 d-flex flex-column bg-white">
 
@@ -251,8 +268,18 @@ export default function App() {
             >
               OCCUPIED
             </button>
-            <span className="nav-link-custom opacity-75 text-muted d-none d-xl-inline">DINING</span>
-            <span className="nav-link-custom opacity-75 text-muted d-none d-xl-inline">GALLERY</span>
+            <button 
+              className={`btn btn-link nav-link-custom text-decoration-none ${activeTab === 'dining' ? 'active' : ''}`}
+              onClick={() => setActiveTab('dining')}
+            >
+              DINING
+            </button>
+            <button 
+              className={`btn btn-link nav-link-custom text-decoration-none ${activeTab === 'gallery' ? 'active' : ''}`}
+              onClick={() => setActiveTab('gallery')}
+            >
+              GALLERY
+            </button>
           </nav>
 
           {/* Center Logo - Dutch Point Negombo */}
@@ -291,8 +318,18 @@ export default function App() {
 
           {/* Right Links & Auth */}
           <div className="d-flex align-items-center gap-2">
-            <span className="nav-link-custom opacity-75 text-muted d-none d-lg-inline">ABOUT US</span>
-            <span className="nav-link-custom opacity-75 text-muted d-none d-lg-inline">CONTACT US</span>
+            <button 
+              className={`btn btn-link nav-link-custom text-decoration-none d-none d-lg-inline ${activeTab === 'about' ? 'active' : ''}`}
+              onClick={() => setActiveTab('about')}
+            >
+              ABOUT US
+            </button>
+            <button 
+              className={`btn btn-link nav-link-custom text-decoration-none d-none d-lg-inline ${activeTab === 'contact' ? 'active' : ''}`}
+              onClick={() => setActiveTab('contact')}
+            >
+              CONTACT US
+            </button>
 
             {user ? (
               <div className="d-flex align-items-center gap-2 ms-2">
@@ -1432,13 +1469,496 @@ export default function App() {
           </section>
         )}
 
+        {/* 7. DINING SECTION */}
+        {activeTab === 'dining' && (
+          <section className="py-5" style={{ backgroundColor: '#fcfbf8' }}>
+            <div className="container">
+              <div className="text-center mb-5">
+                <span className="boutique-tagline d-block mb-1">COASTAL GASTRONOMY & FINE DRINKS</span>
+                <h3 className="brand-serif fw-bold text-dark fs-2 mb-2">Dining at Dutch Point Negombo</h3>
+                <p className="text-muted mx-auto" style={{ maxWidth: '650px' }}>
+                  Indulge in the finest culinary offerings of Sri Lanka's western coast. Savor fresh catch from the Negombo lagoon, aromatic Ceylon spices, and international culinary classics prepared by our master chefs.
+                </p>
+              </div>
+
+              <div className="row g-4 mb-5">
+                {/* Restaurant 1 */}
+                <div className="col-lg-4 col-md-6">
+                  <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                    <div style={{ height: '220px', overflow: 'hidden' }}>
+                      <img src={images.beachView} alt="The Cinnamon Coast Seafood Grill" className="w-100 h-100" style={{ objectFit: 'cover' }} />
+                    </div>
+                    <div className="card-body p-4 d-flex flex-column">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="badge rounded-pill bg-warning text-dark small fw-semibold">BEACHFRONT GRILL</span>
+                        <small className="text-muted"><i className="bi bi-clock me-1"></i>12:00 PM – 11:00 PM</small>
+                      </div>
+                      <h5 className="brand-serif fw-bold text-dark mb-2">The Cinnamon Coast Seafood Grill</h5>
+                      <p className="text-secondary small flex-grow-1">
+                        Located directly on the sands, offering wild-caught Negombo lagoon mud crabs, giant tiger prawns, grilled red snapper, and flame-grilled lobsters seasoned with Ceylon lemongrass and pepper.
+                      </p>
+                      <div className="border-top pt-3 mt-auto">
+                        <span className="small text-muted d-block mb-2"><i className="bi bi-geo-alt me-1 text-danger"></i> Beachfront Pavilion</span>
+                        <a href="https://wa.me/94770000000?text=Hi%20Dutch%20Point,%20I%20would%20like%20to%20reserve%20a%20table%20at%20The%20Cinnamon%20Coast%20Seafood%20Grill" target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-luxury-dark w-100 rounded-pill">
+                          Reserve a Table
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Restaurant 2 */}
+                <div className="col-lg-4 col-md-6">
+                  <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                    <div style={{ height: '220px', overflow: 'hidden' }}>
+                      <img src={images.resortNight} alt="Dutch Fort Colonial Lounge & Bar" className="w-100 h-100" style={{ objectFit: 'cover' }} />
+                    </div>
+                    <div className="card-body p-4 d-flex flex-column">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="badge rounded-pill bg-dark text-white small fw-semibold">HERITAGE LOUNGE & BAR</span>
+                        <small className="text-muted"><i className="bi bi-clock me-1"></i>4:00 PM – 1:00 AM</small>
+                      </div>
+                      <h5 className="brand-serif fw-bold text-dark mb-2">Dutch Fort Colonial Lounge & Bar</h5>
+                      <p className="text-secondary small flex-grow-1">
+                        Sip on signature Ceylon arrack cocktails, imported single malts, and vintage wines under colonial Dutch archways. Featuring live evening acoustic jazz and panoramic ocean breezes.
+                      </p>
+                      <div className="border-top pt-3 mt-auto">
+                        <span className="small text-muted d-block mb-2"><i className="bi bi-geo-alt me-1 text-danger"></i> Main Courtyard</span>
+                        <a href="https://wa.me/94770000000?text=Hi%20Dutch%20Point,%20I%20would%20like%20to%20inquire%20about%20Dutch%20Fort%20Lounge" target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-luxury-dark w-100 rounded-pill">
+                          View Cocktail Menu
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Restaurant 3 */}
+                <div className="col-lg-4 col-md-6">
+                  <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                    <div style={{ height: '220px', overflow: 'hidden' }}>
+                      <img src={images.balconyView} alt="The Palms Sunrise Terrace" className="w-100 h-100" style={{ objectFit: 'cover' }} />
+                    </div>
+                    <div className="card-body p-4 d-flex flex-column">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="badge rounded-pill bg-success text-white small fw-semibold">ALL-DAY BREAKFAST</span>
+                        <small className="text-muted"><i className="bi bi-clock me-1"></i>6:30 AM – 11:30 AM</small>
+                      </div>
+                      <h5 className="brand-serif fw-bold text-dark mb-2">The Palms Sunrise Terrace</h5>
+                      <p className="text-secondary small flex-grow-1">
+                        Start your day overlooking the sparkling Indian Ocean with our tropical breakfast buffet. Enjoy organic tropical fruits, artisan French croissants, and traditional Sri Lankan egg hoppers and sambols.
+                      </p>
+                      <div className="border-top pt-3 mt-auto">
+                        <span className="small text-muted d-block mb-2"><i className="bi bi-geo-alt me-1 text-danger"></i> Ocean View Mezzanine</span>
+                        <button className="btn btn-sm btn-outline-dark w-100 rounded-pill" onClick={() => setActiveTab('rooms')}>
+                          Included with Suites
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* In-Room Dining Banner */}
+              <div className="card border-0 rounded-4 p-4 text-white shadow-sm" style={{ backgroundColor: '#0b1320' }}>
+                <div className="row align-items-center">
+                  <div className="col-md-8">
+                    <span className="badge rounded-pill bg-warning text-dark mb-2">24/7 LUXURY SERVICE</span>
+                    <h4 className="brand-serif fw-bold mb-1">In-Suite Private Dining & Room Service</h4>
+                    <p className="small text-white-50 mb-0">
+                      Private balcony candlelight dinners, champagne breakfasts, or midnight tapas delivered straight to your suite or villa. Simply dial <strong>Ext. 104</strong> from your room phone.
+                    </p>
+                  </div>
+                  <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="tel:+94312234567" className="btn btn-luxury-pill btn-light btn-sm px-4 py-2">
+                      <i className="bi bi-telephone-fill me-1"></i> Call Room Service
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 8. GALLERY SECTION */}
+        {activeTab === 'gallery' && (
+          <section className="py-5" style={{ backgroundColor: '#fcfbf8' }}>
+            <div className="container">
+              <div className="text-center mb-4">
+                <span className="boutique-tagline d-block mb-1">MOMENTS OF TRANQUILITY</span>
+                <h3 className="brand-serif fw-bold text-dark fs-2 mb-2">Resort Visual Gallery</h3>
+                <p className="text-muted mx-auto" style={{ maxWidth: '600px' }}>
+                  Explore the architecture, luxury suites, pristine beachfront, and tropical ambiance of Dutch Point Negombo.
+                </p>
+
+                {/* Filter Pills */}
+                <div className="d-flex justify-content-center gap-2 mt-3">
+                  <button 
+                    className={`btn btn-sm rounded-pill px-3 ${galleryFilter === 'all' ? 'btn-dark' : 'btn-outline-secondary'}`}
+                    onClick={() => setGalleryFilter('all')}
+                  >
+                    All Photos
+                  </button>
+                  <button 
+                    className={`btn btn-sm rounded-pill px-3 ${galleryFilter === 'suites' ? 'btn-dark' : 'btn-outline-secondary'}`}
+                    onClick={() => setGalleryFilter('suites')}
+                  >
+                    Suites & Villas
+                  </button>
+                  <button 
+                    className={`btn btn-sm rounded-pill px-3 ${galleryFilter === 'views' ? 'btn-dark' : 'btn-outline-secondary'}`}
+                    onClick={() => setGalleryFilter('views')}
+                  >
+                    Beach & Grounds
+                  </button>
+                </div>
+              </div>
+
+              {/* Gallery Grid */}
+              <div className="row g-3">
+                {(galleryFilter === 'all' || galleryFilter === 'views') && (
+                  <>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images.hero} alt="Resort Panorama" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Panoramic Ocean Pool & Beachfront</span>
+                          <small className="text-muted">Resort Grounds • Negombo Coast</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images.beachView} alt="Golden Beachfront" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Pristine Golden Shoreline</span>
+                          <small className="text-muted">Direct Private Beach Access</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images.resortNight} alt="Night Atmosphere" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Midnight Illuminated Pool Deck</span>
+                          <small className="text-muted">Courtyard & Lounge Ambiance</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images.balconyView} alt="Balcony Sunset" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Private Balcony Sunset Perspective</span>
+                          <small className="text-muted">Upper Deck Suites</small>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {(galleryFilter === 'all' || galleryFilter === 'suites') && (
+                  <>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images['room_suite.jpg']} alt="Ocean View Suite" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Ocean View Suite Master Bedroom</span>
+                          <small className="text-muted">King Canopy Bed & Ocean Facing Glazing</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images['room_presidential.jpg']} alt="Presidential Penthouse" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Presidential Penthouse Suite</span>
+                          <small className="text-muted">Jacuzzi, Butler Service & 360 View</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images['room_deluxe.jpg']} alt="Deluxe Double" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Deluxe Double Suite</span>
+                          <small className="text-muted">Floor-to-Ceiling Windows & Balcony</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images['room_family.jpg']} alt="Family Villa" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Family Villa & Play Terrace</span>
+                          <small className="text-muted">2 Interconnecting Bedrooms & Private Patio</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <img src={images['room_standard.jpg']} alt="Standard Queen" className="w-100" style={{ height: '260px', objectFit: 'cover' }} />
+                        <div className="p-3 bg-white">
+                          <span className="small fw-bold text-dark d-block">Standard Queen Room</span>
+                          <small className="text-muted">Plush Queen Bed & Modern Ensuite</small>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 9. ABOUT US SECTION */}
+        {activeTab === 'about' && (
+          <section className="py-5" style={{ backgroundColor: '#fcfbf8' }}>
+            <div className="container">
+              {/* Header */}
+              <div className="text-center mb-5">
+                <span className="boutique-tagline d-block mb-1">OUR STORY & HERITAGE</span>
+                <h3 className="brand-serif fw-bold text-dark fs-2 mb-2">Welcome to Dutch Point Negombo</h3>
+                <p className="text-muted mx-auto" style={{ maxWidth: '650px' }}>
+                  A coastal retreat inspired by centuries of maritime heritage, designed for tranquility and modern luxury.
+                </p>
+              </div>
+
+              {/* Story 2-Column Banner */}
+              <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white p-4 p-lg-5 mb-5">
+                <div className="row g-4 align-items-center">
+                  <div className="col-lg-6">
+                    <span className="badge rounded-pill bg-warning text-dark px-3 py-1 mb-3">ESTABLISHED ON PORUTOTA ROAD</span>
+                    <h4 className="brand-serif fw-bold text-dark mb-3">Where Coastal Elegance Meets 17th-Century Dutch Heritage</h4>
+                    <p className="text-secondary" style={{ lineHeight: '1.8' }}>
+                      Nestled along the golden palm-fringed sands of Negombo, <strong>Dutch Point Negombo</strong> was conceived as an intimate sanctuary for travelers seeking escape from the ordinary. 
+                    </p>
+                    <p className="text-secondary" style={{ lineHeight: '1.8' }}>
+                      Taking architectural cues from the historic Dutch colonial settlements of maritime Ceylon, our boutique resort combines grand arched verandas, terracotta finishes, and tropical teak wood with cutting-edge guest comfort.
+                    </p>
+                    <p className="text-secondary mb-0" style={{ lineHeight: '1.8' }}>
+                      Whether you are visiting Sri Lanka for a coastal holiday, a romantic oceanfront getaway, or a peaceful stay near the international airport, our dedicated team is committed to providing warm, unhurried, authentic Sri Lankan hospitality.
+                    </p>
+                  </div>
+                  <div className="col-lg-6">
+                    <div className="position-relative rounded-4 overflow-hidden shadow-sm" style={{ height: '360px' }}>
+                      <img src={images.hero} alt="Dutch Point Negombo Resort" className="w-100 h-100" style={{ objectFit: 'cover' }} />
+                      <div className="position-absolute bottom-0 start-0 end-0 p-3 bg-dark bg-opacity-75 text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <span className="fw-bold d-block">Dutch Point Negombo Beachfront</span>
+                            <small className="text-white-50">Porutota Road, Negombo, Sri Lanka</small>
+                          </div>
+                          <span className="badge bg-warning text-dark px-3 py-2 fw-bold">4.8 ★ Luxury Rating</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Pillars of Dutch Point */}
+              <div className="row g-4 text-center">
+                <div className="col-md-3">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div className="fs-1 text-primary mb-2"><i className="bi bi-water"></i></div>
+                    <h6 className="brand-serif fw-bold text-dark mb-2">Direct Ocean Access</h6>
+                    <p className="text-secondary small mb-0">Step directly from your villa onto the pristine golden beach of Negombo.</p>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div className="fs-1 text-success mb-2"><i className="bi bi-tree"></i></div>
+                    <h6 className="brand-serif fw-bold text-dark mb-2">Eco-Conscious Luxury</h6>
+                    <p className="text-secondary small mb-0">Zero-plastic policy, solar water heating, and sustainably sourced seafood.</p>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div className="fs-1 text-warning mb-2"><i className="bi bi-bell"></i></div>
+                    <h6 className="brand-serif fw-bold text-dark mb-2">24/7 Concierge</h6>
+                    <p className="text-secondary small mb-0">Personal butler service, luxury airport transfers, and private lagoon boat safaris.</p>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div className="fs-1 text-danger mb-2"><i className="bi bi-shield-check"></i></div>
+                    <h6 className="brand-serif fw-bold text-dark mb-2">Guaranteed Booking</h6>
+                    <p className="text-secondary small mb-0">Transactional concurrency protection guaranteeing zero overbooking errors.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 10. CONTACT US SECTION */}
+        {activeTab === 'contact' && (
+          <section className="py-5" style={{ backgroundColor: '#fcfbf8' }}>
+            <div className="container">
+              {/* Header */}
+              <div className="text-center mb-5">
+                <span className="boutique-tagline d-block mb-1">GET IN TOUCH</span>
+                <h3 className="brand-serif fw-bold text-dark fs-2 mb-2">Contact & Location</h3>
+                <p className="text-muted mx-auto" style={{ maxWidth: '600px' }}>
+                  Have questions regarding your reservation, airport transfers, or private events? Our front-desk team is at your service 24 hours a day.
+                </p>
+              </div>
+
+              <div className="row g-4">
+                {/* Contact Details Card */}
+                <div className="col-lg-5">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <h5 className="brand-serif fw-bold text-dark mb-4">Resort Coordinates</h5>
+
+                    <div className="d-flex align-items-start gap-3 mb-4">
+                      <div className="p-3 rounded-circle bg-light text-primary">
+                        <i className="bi bi-geo-alt-fill fs-5"></i>
+                      </div>
+                      <div>
+                        <span className="fw-semibold text-dark d-block">Physical Address</span>
+                        <small className="text-muted">Porutota Road, Negombo 11500,<br />Western Province, Sri Lanka</small>
+                      </div>
+                    </div>
+
+                    <div className="d-flex align-items-start gap-3 mb-4">
+                      <div className="p-3 rounded-circle bg-light text-success">
+                        <i className="bi bi-telephone-fill fs-5"></i>
+                      </div>
+                      <div>
+                        <span className="fw-semibold text-dark d-block">Telephone & WhatsApp</span>
+                        <small className="text-muted d-block">Front Desk: +94 31 223 4567</small>
+                        <small className="text-muted d-block">Direct Concierge: +94 77 123 4567</small>
+                      </div>
+                    </div>
+
+                    <div className="d-flex align-items-start gap-3 mb-4">
+                      <div className="p-3 rounded-circle bg-light text-warning">
+                        <i className="bi bi-envelope-fill fs-5"></i>
+                      </div>
+                      <div>
+                        <span className="fw-semibold text-dark d-block">Electronic Inquiries</span>
+                        <small className="text-muted d-block">Reservations: reservations@dutchpoint.lk</small>
+                        <small className="text-muted d-block">General: info@dutchpoint.lk</small>
+                      </div>
+                    </div>
+
+                    <div className="d-flex align-items-start gap-3 mb-4">
+                      <div className="p-3 rounded-circle bg-light text-info">
+                        <i className="bi bi-airplane-fill fs-5"></i>
+                      </div>
+                      <div>
+                        <span className="fw-semibold text-dark d-block">Airport Proximity</span>
+                        <small className="text-muted">Only 15 minutes (12 km) drive from Bandaranaike International Airport (CMB).</small>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-3 border-top">
+                      <a 
+                        href="https://wa.me/94770000000" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="btn btn-success w-100 rounded-pill py-2 fw-semibold"
+                      >
+                        <i className="bi bi-whatsapp me-2"></i> Chat with Concierge on WhatsApp
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Inquiry Form Card */}
+                <div className="col-lg-7">
+                  <div className="card border-0 shadow-sm rounded-4 p-4 p-lg-5 bg-white h-100">
+                    <h5 className="brand-serif fw-bold text-dark mb-1">Send an Inquiry</h5>
+                    <p className="text-muted small mb-4">Our front office typically replies within 30 minutes.</p>
+
+                    <form onSubmit={handleInquirySubmit}>
+                      <div className="row g-3 mb-3">
+                        <div className="col-md-6">
+                          <label className="form-label small fw-semibold text-secondary">Your Name</label>
+                          <input 
+                            type="text" 
+                            className="form-control rounded-pill px-3" 
+                            required 
+                            placeholder="e.g. John Doe"
+                            value={inquiryName}
+                            onChange={(e) => setInquiryName(e.target.value)}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label small fw-semibold text-secondary">Email Address</label>
+                          <input 
+                            type="email" 
+                            className="form-control rounded-pill px-3" 
+                            required 
+                            placeholder="e.g. john@example.com"
+                            value={inquiryEmail}
+                            onChange={(e) => setInquiryEmail(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label small fw-semibold text-secondary">Inquiry Type</label>
+                        <select 
+                          className="form-select rounded-pill px-3"
+                          value={inquirySubject}
+                          onChange={(e) => setInquirySubject(e.target.value)}
+                        >
+                          <option value="Reservation Inquiry">Room Reservation & Availability</option>
+                          <option value="Airport Transfer">Airport Transfer (CMB to Hotel)</option>
+                          <option value="Dining Reservation">Seafood Grill & Restaurant Booking</option>
+                          <option value="Event Inquiry">Wedding / Beach Event Gathering</option>
+                          <option value="General Inquiry">Other General Question</option>
+                        </select>
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="form-label small fw-semibold text-secondary">Message</label>
+                        <textarea 
+                          rows="4" 
+                          className="form-control rounded-4 p-3" 
+                          required 
+                          placeholder="How can we assist with your stay in Negombo?"
+                          value={inquiryMessage}
+                          onChange={(e) => setInquiryMessage(e.target.value)}
+                        ></textarea>
+                      </div>
+
+                      <button type="submit" className="btn btn-luxury-dark rounded-pill px-5 py-2">
+                        <i className="bi bi-send-fill me-2"></i> Submit Inquiry
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
       </main>
 
       {/* FOOTER */}
       <footer className="py-4 text-center border-top text-secondary small" style={{ backgroundColor: '#fcfbf8' }}>
         <div className="container">
-          <div className="brand-serif fs-5 fw-bold text-dark mb-1">Dutch Point Negombo</div>
-          <p className="mb-0 text-muted">Boutique Luxury Beach Resort • Negombo, Sri Lanka</p>
+          <div 
+            className="brand-serif fs-5 fw-bold text-dark mb-1 cursor-pointer" 
+            onClick={() => setActiveTab('home')}
+            style={{ cursor: 'pointer' }}
+          >
+            Dutch Point Negombo
+          </div>
+          <p className="mb-2 text-muted">Boutique Luxury Beach Resort • Porutota Road, Negombo, Sri Lanka</p>
+          <div className="d-flex flex-wrap justify-content-center gap-3 small text-muted">
+            <span className="cursor-pointer" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('rooms')}>Suites</span>
+            <span>•</span>
+            <span className="cursor-pointer" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('dining')}>Dining</span>
+            <span>•</span>
+            <span className="cursor-pointer" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('gallery')}>Gallery</span>
+            <span>•</span>
+            <span className="cursor-pointer" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('about')}>About Us</span>
+            <span>•</span>
+            <span className="cursor-pointer" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('contact')}>Contact</span>
+          </div>
         </div>
       </footer>
 
