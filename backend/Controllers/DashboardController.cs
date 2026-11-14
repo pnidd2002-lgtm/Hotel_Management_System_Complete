@@ -37,7 +37,7 @@ namespace HotelManagementApi.Controllers
             var totalBookings = await _context.Bookings.CountAsync();
             var totalCustomers = await _context.Customers.CountAsync(c => c.Role == "Customer");
 
-            var totalRevenue = await _context.Bookings
+            var totalRevenue = await _context.Bookings // calculate total revenue by filtering only confirmed bookings//
                 .Where(b => b.BookingStatus != "Cancelled")
                 .SumAsync(b => b.TotalAmount);
 

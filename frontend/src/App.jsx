@@ -1340,7 +1340,7 @@ export default function App() {
                     <h3 className="brand-serif fw-bold text-dark mb-1 fs-2">
                       {dashboardStats?.totalCustomers ?? 0}
                     </h3>
-                    <p className="text-secondary small mb-0">Active customer accounts with BCrypt-salted credentials</p>
+                    <p className="text-secondary small mb-0">Active customer accounts</p>
                   </div>
                 </div>
               </div>
@@ -1350,7 +1350,7 @@ export default function App() {
                 <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
                   <div>
                     <h5 className="brand-serif fw-bold text-dark mb-1">Card Payment Transactions</h5>
-                    <p className="text-muted small mb-0">Verified electronic transactions and PCI-DSS masked audit logs</p>
+                    <p className="text-muted small mb-0">Verified electronic transactions and  audit logs</p>
                   </div>
                   <span className="badge rounded-pill bg-light text-dark border px-3 py-2 small">
                     {adminPayments.length} Payment{adminPayments.length === 1 ? '' : 's'}
